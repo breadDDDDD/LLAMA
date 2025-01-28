@@ -173,3 +173,4 @@ mlruns
 
 # PyPI configuration file
 .pypirc
+.pdf
