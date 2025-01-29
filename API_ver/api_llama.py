@@ -20,7 +20,7 @@ class LLAMA(Resource):
         },
         'parameters': [
             {
-                'name': 'Prompt Chatbot',
+                'name': 'prompt',
                 'in': 'body',
                 'required': True,
                 'description': 'write prompt',
@@ -36,13 +36,16 @@ class LLAMA(Resource):
         ]
     })
     def post(self):
+        data = request.get_json()
+        prompt = data['prompt']
+
         response_llm = ollama.chat(
             model="sharkboo",
             messages=[
-                {"role": "user", "content": "prompt"}
+                {"role": "user", "content": prompt}
                 ]
         )
-        return response_llm["message"]["content"]
+        return response_llm["message"]["content"],200
 
 class FileUpload(Resource):
     @swag_from({
@@ -66,7 +69,7 @@ class FileUpload(Resource):
         },
         'parameters': [
             {
-                'name': 'Post file',
+                'name': 'file',
                 'in': 'formData',
                 'type': 'file',
                 'required': True,
@@ -94,7 +97,7 @@ class FileUpload(Resource):
             },
             'parameters': [
                 {
-                    'name': 'Delete filename',
+                    'name': 'filename',
                     'in': 'query',
                     'type': 'string',
                     'required': True,
@@ -115,6 +118,10 @@ class FileUpload(Resource):
         else:
             if not os.path.exists(dir):
                 return {"error": "Uploads directory does not exist"}, 404
+
+class LLAMA_read(Resource):
+    def post(self):
+        return("yes")
 
 api.add_resource(LLAMA, '/LLAMAChat')
 api.add_resource(FileUpload, '/Upload')
