@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sharkboo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #000;
+            color: white;
+            margin: 0;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .header {
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .header img {
+            width: 50px;
+            height: 50px;
+            margin-right: 10px;
+        }
+        .top-right {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+        }
+        .top-right img {
+            width: 50px;
+            height: 50px;
+        }
+        h1 {
+            margin: 0;
+        }
+        .chat-container {
+            width: 90%;
+
+            background: #111;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: 83vh;
+
+        }
+        .chat-box {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+        }
+        .message-container {
+            display: flex;
+            align-items: flex-start;
+            margin: 5px 0;
+        }
+        .message {
+            padding: 8px;
+            border-radius: 5px;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+        .user {
+            background-color: #1d6db3;
+            color: white;
+            align-self: flex-end;
+            text-align: right;
+            margin-left: auto;
+        }
+        .bot {
+            background-color: #333;
+            color: white;
+        }
+        .bot-avatar {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+        .input-container {
+            display: flex;
+            padding: 10px;
+        }
+        .input-container input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #555;
+            border-radius: 5px;
+            background: #222;
+            color: white;
+        }
+        .input-container button {
+            padding: 10px 15px;
+            margin-left: 5px;
+            border: none;
+            background: #1d6db3;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        @media (max-width: 600px) {
+            .chat-container {
+                width: 100%;
+                height: 90vh;
+                margin: 0 10;
+            }
+            .bot-avatar {
+                width: 30px;
+                height: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Sharkboo</h1>
+    </div>
+    <div class="top-right">
+        <img src="data/Resonium_29_Sharkboo.webp" alt="User Avatar">
+    </div>
+    <div class="chat-container">
+        <div class="chat-box" id="chatBox">
+            <div class="message-container">
+                <img src="data/Sharkboo_Portrait.webp" alt="Bot Avatar" class="bot-avatar">
+                <div class="message bot">Hello! How can I assist you today?</div>
+            </div>
+        </div>
+        <div class="input-container">
+            <input type="text" id="userInput" placeholder="Type a message...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        function sendMessage() {
+            const input = document.getElementById("userInput");
+            const chatBox = document.getElementById("chatBox");
+            const messageText = input.value.trim();
+        
+            if (messageText === "") return;
+        
+            const userMessage = document.createElement("div");
+            userMessage.className = "message user";
+            userMessage.textContent = messageText;
+            chatBox.appendChild(userMessage);
+            input.value = "";
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            fetch("http://127.0.0.1:5000/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ message: messageText })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const botMessageContainer = document.createElement("div");
+                botMessageContainer.className = "message-container";
+        
+                const botAvatar = document.createElement("img");
+                botAvatar.src = "data/Sharkboo_Portrait.webp";
+                botAvatar.alt = "Bot Avatar";
+                botAvatar.className = "bot-avatar";
+        
+                const botMessage = document.createElement("div");
+                botMessage.className = "message bot";
+                botMessage.textContent = data.response;
+        
+                botMessageContainer.appendChild(botAvatar);
+                botMessageContainer.appendChild(botMessage);
+                chatBox.appendChild(botMessageContainer);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            })
+            .catch(error => console.error("Error:", error));
+        }
+        
+    </script>        
+</body>
+</html>

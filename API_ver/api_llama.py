@@ -4,6 +4,7 @@ from flasgger import Swagger, swag_from
 import os
 import ollama
 
+#this is for development purposes
 app = Flask(__name__)
 api = Api(app)
 app.config['SWAGGER'] = {
@@ -35,7 +36,7 @@ class LLAMA(Resource):
             }
         ]
     })
-    def post(self):
+    def post(self):                                         
         data = request.get_json()
         prompt = data['prompt']
 
@@ -119,9 +120,6 @@ class FileUpload(Resource):
             if not os.path.exists(dir):
                 return {"error": "Uploads directory does not exist"}, 404
 
-class LLAMA_read(Resource):
-    def post(self):
-        return("yes")
 
 api.add_resource(LLAMA, '/LLAMAChat')
 api.add_resource(FileUpload, '/Upload')
