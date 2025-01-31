@@ -1,24 +1,28 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import requests
 import json
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 app = Flask(__name__)
 CORS(app)  
 
-url = "http://localhost:11434/api/generate"
-conversation_history = []
+url = os.getenv("url_req")
 headers = {
     'Content-Type': 'application/json',
 }
 
 @app.route('/chat', methods=['POST'])
+    
 def chat():
 
     data = request.get_json()
     prompt = data.get("message", "")
     
     def generate_response(prompt):
+        conversation_history = []
         conversation_history.append(prompt)
 
         full_prompt = "\n".join(conversation_history)

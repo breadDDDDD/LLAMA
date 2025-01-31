@@ -2,7 +2,10 @@ from flask import Flask, jsonify, request
 from flask_restful import Api, Resource
 from flasgger import Swagger, swag_from
 import os
+import json
+from dotenv import load_dotenv
 import ollama
+import requests
 
 #this is for development purposes
 app = Flask(__name__)
@@ -12,7 +15,66 @@ app.config['SWAGGER'] = {
     'uiversion': 3
 }
 swagger = Swagger(app)
+load_dotenv()
+url = os.getenv("url_req")
+headers = {
+    'Content-Type': 'application/json',
+}
 
+class LLAMA_API(Resource):
+    @swag_from({
+        'responses': {
+            200: {'description': 'prompt successfully'},
+            400: {'description': 'error'}
+        },
+        'parameters': [
+            {
+                'name': 'prompt',
+                'in': 'body',
+                'required': True,
+                'description': 'write prompt',
+                'schema': {
+                    'type': 'object',
+                    'properties': {
+                        
+                        'prompt': {'type': 'string'}
+                    },
+                    'required': [ 'prompt']
+                }
+            }
+        ]
+    })
+    
+    def post(self):
+        data = request.get_json()
+        prompt = data['prompt']
+        
+        def generate_response(prompt):
+            conversation_history = []
+            conversation_history.append(prompt)
+
+            full_prompt = "\n".join(conversation_history)
+
+            data = {
+                "model": "sharkboo",
+                "stream": False,
+                "prompt": full_prompt,
+            }
+
+            response = requests.post(url, headers=headers, data=json.dumps(data))
+
+            if response.status_code == 200:
+                response_text = response.text
+                data = json.loads(response_text)
+                actual_response = data["response"]
+                conversation_history.append(actual_response)
+                return actual_response
+            else:
+                print("Error:", response.status_code, response.text)
+                return None, 400
+        return ({"response" : generate_response(prompt)}), 200
+
+        
 class LLAMA(Resource):
     @swag_from({
         'responses': {
@@ -122,6 +184,7 @@ class FileUpload(Resource):
 
 
 api.add_resource(LLAMA, '/LLAMAChat')
+api.add_resource(LLAMA_API, '/LLAMACHATAPI')
 api.add_resource(FileUpload, '/Upload')
 
 
